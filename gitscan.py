@@ -3,6 +3,7 @@
 import sys
 import getopt
 import os
+from git import Repo
 
 # Global options with default values.
 verbose = False
@@ -23,16 +24,21 @@ def main():
 
 
 def processDir(d):
+    debug("Processing directory %s" % d)
     for sd in listdir_fullpath(d):
         if os.path.isdir(sd):
+            debug("Processing subdirectory %s" % sd)
             hasgit = os.path.isdir(os.path.join(sd, ".git"))
             if not hasgit and shownogit:
                 print sd
-            elif hasgit and showgit:
-                print sd
-
-    if showgit:
-        warn("Checking for git remotes is not implemented yet.")
+            elif hasgit:
+                repo = Repo(sd)
+                hasorigin = hasattr(repo.remotes, "origin")
+                if hasorigin:
+                    if showorigin:
+                        print sd 
+                elif showgit:
+                    print sd
 
 
 def listdir_fullpath(d):
@@ -45,7 +51,8 @@ def usage():
 
     Options:
     -n          Show directories that do not contain a '.git' subdir
-    -g          Show directories that DO contain a '.git' subdir
+    -g          Show directories that DO contain a '.git' subdir but no remote
+                named 'origin'.
     -o          Show directories that have an 'origin' remote
     -h          Show this help text.
     -v          Display verbose output.
@@ -60,7 +67,7 @@ def parse_options(args):
     # Parse options using Getopt; display an error and exit if options could not
     # be parsed.
     try:
-        opts, args = getopt.getopt(args, "o:hvngo")
+        opts, args = getopt.getopt(args, "ohvngo")
     except getopt.GetoptError, err:
         print str(err)
         usage()
@@ -87,7 +94,7 @@ def parse_options(args):
 
 def debug(s):
     if verbose:
-        sys.stderr.write(s + "\n")
+        sys.stderr.write("DEBUG: %s\n" % s)
 
 def warn(s):
     sys.stderr.write("WARN: %s\n" % s)
