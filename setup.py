@@ -17,7 +17,7 @@ setup(
         "gitpython",
         ],
     entry_points={
-        "console_scripts": ["gitscan = gitscan:main"]
+        "console_scripts": ["gitscan = gitscan.gitscan:main"]
         },
     classifiers=[
         'Development Status :: 4 - Beta',
